@@ -1,0 +1,234 @@
+<!-- Hero -->
+<section class="relative isolate overflow-hidden">
+  <div class="mesh absolute inset-0 -z-10" aria-hidden="true"></div>
+
+  <div
+    class="mx-auto grid max-w-shell items-center gap-14 px-4 pb-20 pt-14 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12 lg:pb-28 lg:pt-20"
+  >
+    <div>
+      <p class="glass animate-rise inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm font-medium">
+        <span class="relative flex h-2 w-2">
+          <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70"></span>
+          <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-400"></span>
+        </span>
+        @if (loading()) {
+          Checking who is available
+        } @else {
+          {{ availableCount() }} {{ availableCount() === 1 ? 'dog is' : 'dogs are' }} ready to meet you
+        }
+      </p>
+
+      <h1
+        class="animate-rise mt-6 max-w-xl text-4xl font-extrabold leading-[1.04] tracking-tight sm:text-6xl"
+        style="animation-delay: 80ms"
+      >
+        Meet the dogs waiting for a home in our city
+      </h1>
+
+      <p class="animate-rise mt-5 max-w-lg text-lg leading-relaxed text-muted" style="animation-delay: 160ms">
+        Every dog here is vaccinated, health-checked and ready to meet you. Search by name or breed, or filter by age and size.
+      </p>
+
+      <form
+        role="search"
+        class="glass animate-rise mt-9 flex max-w-xl items-center gap-2 rounded-full p-2 pl-5 focus-within:ring-2 focus-within:ring-indigo-400/60"
+        style="animation-delay: 240ms"
+        (submit)="scrollToResults($event)"
+      >
+        <app-icon name="search" [size]="20" class="text-muted" />
+        <label for="hero-search" class="sr-only">Search dogs by name or breed</label>
+        <input
+          id="hero-search"
+          type="search"
+          autocomplete="off"
+          placeholder="Search by name or breed"
+          class="min-w-0 flex-1 bg-transparent py-2.5 text-base outline-none placeholder:text-muted/80"
+          [value]="query()"
+          (input)="onSearch($event)"
+        />
+        <button type="submit" class="btn btn-primary !rounded-full !px-6">Search</button>
+      </form>
+
+      <div
+        class="animate-rise mt-5 flex max-w-xl flex-wrap gap-2.5"
+        style="animation-delay: 320ms"
+        role="group"
+        aria-label="Filter dogs"
+      >
+        @for (f of filters; track f.id) {
+          <button
+            type="button"
+            class="pill"
+            [class.pill-active]="filter() === f.id"
+            [attr.aria-pressed]="filter() === f.id"
+            (click)="filter.set(f.id)"
+          >
+            <app-icon [name]="f.icon" [size]="16" />
+            {{ f.label }}
+            @if (!loading()) {
+              <span class="pill-count">{{ counts()[f.id] }}</span>
+            }
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Featured: the dog who has waited longest -->
+    <div class="animate-rise relative mx-auto w-full max-w-md lg:max-w-none" style="animation-delay: 280ms">
+      @if (featured(); as dog) {
+        <div
+          class="glass absolute inset-0 translate-x-4 translate-y-4 rotate-[2.5deg] rounded-[2rem] opacity-60"
+          aria-hidden="true"
+        ></div>
+        <article class="glass-strong relative rounded-[2rem] p-3">
+          <div class="relative aspect-[4/4.2] overflow-hidden rounded-3xl">
+            <img
+              [src]="dog.imageUrl"
+              [alt]="'Photo of ' + dog.name + ', ' + dog.breed"
+              width="640"
+              height="520"
+              class="h-full w-full object-cover"
+              (error)="onImageError($event)"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/10 to-transparent" aria-hidden="true"></div>
+            <span class="badge s-pending absolute left-4 top-4">
+              <app-icon name="clock" [size]="13" />
+              Here the longest: {{ dog.arrivedOn | daysWaiting }}
+            </span>
+            <div class="absolute inset-x-0 bottom-0 p-5 text-white">
+              <h2 class="text-3xl font-extrabold tracking-tight">{{ dog.name }}</h2>
+              <p class="mt-1 text-sm text-white/85">{{ dog.breed }}, {{ dog.ageMonths | age }} old</p>
+            </div>
+          </div>
+          <div class="flex items-center justify-between gap-4 p-3 pt-4">
+            <p class="line-clamp-2 text-sm leading-relaxed text-muted">{{ dog.description }}</p>
+            <button type="button" class="btn btn-coral shrink-0" (click)="select(dog)">Meet {{ dog.name }}</button>
+          </div>
+        </article>
+      } @else if (loading()) {
+        <div class="glass-strong rounded-[2rem] p-3" aria-hidden="true">
+          <div class="skeleton aspect-[4/4.2] !rounded-3xl"></div>
+          <div class="skeleton m-3 h-10"></div>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- Results -->
+<section id="results" class="mx-auto max-w-shell scroll-mt-24 px-4 pt-6 sm:px-6" aria-labelledby="results-title">
+  <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <h2 id="results-title" class="text-3xl font-extrabold tracking-tight">Dogs looking for a home</h2>
+      <p class="mt-1.5 text-muted" aria-live="polite">
+        @if (loading()) {
+          Loading dogs
+        } @else {
+          Showing {{ visible().length }} {{ visible().length === 1 ? 'dog' : 'dogs' }}
+        }
+      </p>
+    </div>
+
+    <div class="flex items-center gap-3">
+      @if (hasActiveFilters()) {
+        <button type="button" class="btn btn-ghost !py-2.5" (click)="clearFilters()">
+          <app-icon name="x" [size]="16" />
+          Clear filters
+        </button>
+      }
+      <label for="sort" class="sr-only">Sort dogs</label>
+      <select id="sort" class="field-input !w-auto cursor-pointer !py-2.5 pr-8" [value]="sort()" (change)="onSort($event)">
+        @for (s of sorts; track s.id) {
+          <option [value]="s.id">{{ s.label }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" aria-hidden="true">
+      @for (n of [1, 2, 3, 4, 5, 6, 7, 8]; track n) {
+        <div class="glass overflow-hidden rounded-3xl">
+          <div class="skeleton aspect-[4/3] !rounded-none"></div>
+          <div class="space-y-3 p-5">
+            <div class="skeleton h-6 w-1/2"></div>
+            <div class="flex gap-2">
+              <div class="skeleton h-6 w-20 !rounded-full"></div>
+              <div class="skeleton h-6 w-16 !rounded-full"></div>
+              <div class="skeleton h-6 w-16 !rounded-full"></div>
+            </div>
+            <div class="skeleton h-12"></div>
+            <div class="skeleton h-11 !rounded-2xl"></div>
+          </div>
+        </div>
+      }
+    </div>
+  } @else if (visible().length === 0) {
+    <div class="glass mx-auto flex max-w-lg flex-col items-center rounded-3xl px-8 py-14 text-center">
+      <span class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl text-white" style="background-image: var(--brand-gradient)">
+        <app-icon name="search" [size]="26" />
+      </span>
+      <h3 class="text-xl font-bold">No dogs match those filters</h3>
+      <p class="mt-2 text-muted">Try a different name or breed, or clear the filters to see every dog.</p>
+      <button type="button" class="btn btn-primary mt-6" (click)="clearFilters()">Show all dogs</button>
+    </div>
+  } @else {
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      @for (dog of visible(); track dog.id) {
+        <app-dog-card [dog]="dog" (adopt)="select($event)" />
+      }
+    </div>
+  }
+</section>
+
+<!-- How adoption works: a real sequence, so the steps are numbered -->
+<section class="mx-auto mt-24 max-w-shell px-4 sm:px-6" aria-labelledby="how-title">
+  <div class="glass rounded-[2rem] p-8 sm:p-12">
+    <h2 id="how-title" class="max-w-md text-3xl font-extrabold tracking-tight">How adopting a dog works</h2>
+    <ol class="mt-10 grid gap-8 md:grid-cols-3">
+      <li class="flex gap-4">
+        <span
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
+          style="background-image: var(--brand-gradient)"
+          >1</span
+        >
+        <div>
+          <h3 class="font-bold">Tell us you're interested</h3>
+          <p class="mt-1.5 text-sm leading-relaxed text-muted">
+            Press Adopt Me on a dog and share a few details about you and your home.
+          </p>
+        </div>
+      </li>
+      <li class="flex gap-4">
+        <span
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
+          style="background-image: var(--brand-gradient)"
+          >2</span
+        >
+        <div>
+          <h3 class="font-bold">Meet them at the office</h3>
+          <p class="mt-1.5 text-sm leading-relaxed text-muted">
+            Our adoption team will contact you within 2 working days to arrange a visit.
+          </p>
+        </div>
+      </li>
+      <li class="flex gap-4">
+        <span
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
+          style="background-image: var(--brand-gradient)"
+          >3</span
+        >
+        <div>
+          <h3 class="font-bold">Sign the paperwork and go home</h3>
+          <p class="mt-1.5 text-sm leading-relaxed text-muted">
+            Once you and the dog are a match, we complete the adoption forms and you take them home.
+          </p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+@if (selected(); as dog) {
+  <app-adopt-drawer [dog]="dog" (closed)="selected.set(null)" />
+}

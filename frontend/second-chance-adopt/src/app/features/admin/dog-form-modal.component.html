@@ -1,0 +1,240 @@
+<div class="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-6">
+  <div class="animate-fade-in absolute inset-0 bg-slate-950/60 backdrop-blur-sm" (click)="closed.emit()" aria-hidden="true"></div>
+
+  <div
+    appModal
+    (dismiss)="closed.emit()"
+    class="glass-strong animate-pop relative flex max-h-full w-full max-w-3xl flex-col overflow-hidden rounded-t-[2rem] sm:rounded-[2rem]"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="dog-form-title"
+  >
+    <header class="flex items-center justify-between gap-4 border-b px-6 py-5" style="border-color: var(--glass-border)">
+      <div>
+        <h2 id="dog-form-title" class="text-xl font-extrabold tracking-tight">
+          @if (dog(); as d) {
+            Edit {{ d.name }}
+          } @else {
+            Add a dog
+          }
+        </h2>
+        <p class="mt-0.5 text-sm text-muted">
+          @if (dog()) {
+            Changes appear on the public site as soon as you save.
+          } @else {
+            The dog appears on the public site as soon as you save.
+          }
+        </p>
+      </div>
+      <button type="button" class="icon-btn" (click)="closed.emit()" aria-label="Close">
+        <app-icon name="x" [size]="20" />
+      </button>
+    </header>
+
+    <form [formGroup]="form" (ngSubmit)="save()" novalidate class="flex min-h-0 flex-1 flex-col">
+      <div class="grid flex-1 gap-6 overflow-y-auto p-6 md:grid-cols-[13rem_1fr]">
+        <!-- Photo preview -->
+        <div>
+          <p class="field-label">Photo preview</p>
+          <div
+            class="relative aspect-[4/5] overflow-hidden rounded-3xl border"
+            style="border-color: var(--field-border); background: var(--field-bg)"
+          >
+            @if (previewUrl(); as url) {
+              <img [src]="url" alt="Preview of the dog photo" class="h-full w-full object-cover" (error)="onImageError($event)" />
+            } @else {
+              <div class="flex h-full flex-col items-center justify-center gap-2 px-4 text-center text-muted">
+                <app-icon name="image" [size]="28" />
+                <p class="text-xs leading-relaxed">Paste an image link to see the photo here.</p>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="grid gap-5 sm:grid-cols-2">
+          <!-- Name -->
+          <div>
+            <label for="dog-name" class="field-label">Name</label>
+            <input
+              id="dog-name"
+              type="text"
+              formControlName="name"
+              placeholder="Juniper"
+              autocomplete="off"
+              class="field-input"
+              [class.is-invalid]="isInvalid('name')"
+              [class.is-valid]="isValid('name')"
+              [attr.aria-invalid]="isInvalid('name')"
+              [attr.aria-describedby]="isInvalid('name') ? 'dog-name-error' : null"
+              data-autofocus
+            />
+            @if (isInvalid('name')) {
+              <p id="dog-name-error" class="field-error" role="alert">
+                <app-icon name="alert-circle" [size]="14" class="mt-px" />{{ errorText('name') }}
+              </p>
+            }
+          </div>
+
+          <!-- Breed -->
+          <div>
+            <label for="dog-breed" class="field-label">Breed</label>
+            <input
+              id="dog-breed"
+              type="text"
+              formControlName="breed"
+              placeholder="Labrador Retriever mix"
+              autocomplete="off"
+              class="field-input"
+              [class.is-invalid]="isInvalid('breed')"
+              [class.is-valid]="isValid('breed')"
+              [attr.aria-invalid]="isInvalid('breed')"
+              [attr.aria-describedby]="isInvalid('breed') ? 'dog-breed-error' : null"
+            />
+            @if (isInvalid('breed')) {
+              <p id="dog-breed-error" class="field-error" role="alert">
+                <app-icon name="alert-circle" [size]="14" class="mt-px" />{{ errorText('breed') }}
+              </p>
+            }
+          </div>
+
+          <!-- Age -->
+          <div>
+            <label for="dog-age" class="field-label">Age</label>
+            <div class="flex gap-2">
+              <input
+                id="dog-age"
+                type="number"
+                inputmode="numeric"
+                min="1"
+                formControlName="ageValue"
+                placeholder="3"
+                class="field-input min-w-0 flex-1"
+                [class.is-invalid]="isInvalid('ageValue')"
+                [class.is-valid]="isValid('ageValue')"
+                [attr.aria-invalid]="isInvalid('ageValue')"
+                [attr.aria-describedby]="isInvalid('ageValue') ? 'dog-age-error' : null"
+              />
+              <label for="dog-age-unit" class="sr-only">Age unit</label>
+              <select id="dog-age-unit" formControlName="ageUnit" class="field-input !w-auto cursor-pointer">
+                <option value="months">months</option>
+                <option value="years">years</option>
+              </select>
+            </div>
+            @if (isInvalid('ageValue')) {
+              <p id="dog-age-error" class="field-error" role="alert">
+                <app-icon name="alert-circle" [size]="14" class="mt-px" />{{ errorText('ageValue') }}
+              </p>
+            }
+          </div>
+
+          <!-- Gender -->
+          <div>
+            <label for="dog-gender" class="field-label">Gender</label>
+            <select id="dog-gender" formControlName="gender" class="field-input cursor-pointer">
+              @for (g of genders; track g) {
+                <option [value]="g">{{ g }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Size -->
+          <div>
+            <label for="dog-size" class="field-label">Size</label>
+            <select id="dog-size" formControlName="size" class="field-input cursor-pointer">
+              @for (s of sizes; track s) {
+                <option [value]="s">{{ s }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Status -->
+          <div>
+            <label for="dog-status" class="field-label">Status</label>
+            <select id="dog-status" formControlName="status" class="field-input cursor-pointer">
+              @for (s of statuses; track s) {
+                <option [value]="s">{{ s }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Image URL -->
+          <div class="sm:col-span-2">
+            <label for="dog-image" class="field-label">Image URL</label>
+            <input
+              id="dog-image"
+              type="url"
+              formControlName="imageUrl"
+              placeholder="https://example.com/juniper.jpg"
+              autocomplete="off"
+              class="field-input"
+              [class.is-invalid]="isInvalid('imageUrl')"
+              [class.is-valid]="isValid('imageUrl')"
+              [attr.aria-invalid]="isInvalid('imageUrl')"
+              [attr.aria-describedby]="isInvalid('imageUrl') ? 'dog-image-error' : null"
+            />
+            @if (isInvalid('imageUrl')) {
+              <p id="dog-image-error" class="field-error" role="alert">
+                <app-icon name="alert-circle" [size]="14" class="mt-px" />{{ errorText('imageUrl') }}
+              </p>
+            }
+          </div>
+
+          <!-- Description -->
+          <div class="sm:col-span-2">
+            <label for="dog-description" class="field-label">Description</label>
+            <textarea
+              id="dog-description"
+              formControlName="description"
+              rows="4"
+              placeholder="Describe their personality, how they behave around people and other animals, and the home that would suit them."
+              class="field-input resize-none leading-relaxed"
+              [class.is-invalid]="isInvalid('description')"
+              [class.is-valid]="isValid('description')"
+              [attr.aria-invalid]="isInvalid('description')"
+              [attr.aria-describedby]="isInvalid('description') ? 'dog-description-error' : null"
+            ></textarea>
+            <div class="flex items-start justify-between gap-3">
+              @if (isInvalid('description')) {
+                <p id="dog-description-error" class="field-error" role="alert">
+                  <app-icon name="alert-circle" [size]="14" class="mt-px" />{{ errorText('description') }}
+                </p>
+              } @else {
+                <span></span>
+              }
+              <p class="field-hint shrink-0 tabular-nums" [class.!text-rose-400]="descLength() > 500">{{ descLength() }} / 500</p>
+            </div>
+          </div>
+
+          <!-- Health -->
+          <fieldset class="sm:col-span-2">
+            <legend class="field-label">Health</legend>
+            <div class="flex flex-wrap gap-6">
+              <label class="inline-flex cursor-pointer items-center gap-2.5 text-sm">
+                <input type="checkbox" formControlName="vaccinated" class="h-4 w-4 cursor-pointer rounded accent-indigo-500" />
+                Vaccinated
+              </label>
+              <label class="inline-flex cursor-pointer items-center gap-2.5 text-sm">
+                <input type="checkbox" formControlName="neutered" class="h-4 w-4 cursor-pointer rounded accent-indigo-500" />
+                Neutered or spayed
+              </label>
+            </div>
+          </fieldset>
+        </div>
+      </div>
+
+      <footer class="flex items-center justify-end gap-3 border-t px-6 py-5" style="border-color: var(--glass-border)">
+        <button type="button" class="btn btn-ghost" (click)="closed.emit()">Cancel</button>
+        <button type="submit" class="btn btn-primary min-w-36" [disabled]="saving()">
+          @if (saving()) {
+            <span class="spinner" aria-hidden="true"></span>
+            Saving
+          } @else if (dog()) {
+            Save changes
+          } @else {
+            Add dog
+          }
+        </button>
+      </footer>
+    </form>
+  </div>
+</div>

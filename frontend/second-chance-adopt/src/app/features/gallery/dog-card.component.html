@@ -1,0 +1,60 @@
+<article class="glass card-lift group flex h-full flex-col overflow-hidden rounded-3xl">
+  <div class="relative aspect-[4/3] overflow-hidden">
+    <img
+      [src]="dog().imageUrl"
+      [alt]="'Photo of ' + dog().name + ', ' + dog().breed"
+      width="640"
+      height="520"
+      loading="lazy"
+      decoding="async"
+      class="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+      (error)="onImageError($event)"
+    />
+    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/55 via-transparent to-slate-950/10" aria-hidden="true"></div>
+
+    <span
+      class="badge absolute left-3 top-3"
+      [class.badge-available]="dog().status === 'Available'"
+      [class.badge-pending]="dog().status === 'Pending'"
+      [class.badge-adopted]="dog().status === 'Adopted'"
+    >
+      <span class="badge-dot"></span>
+      {{ dog().status === 'Pending' ? 'Pending Adoption' : dog().status }}
+    </span>
+
+    <span class="chip-glass absolute right-3 top-3" [attr.title]="'Arrived ' + (dog().arrivedOn | daysWaiting) + ' ago'">
+      <app-icon name="clock" [size]="13" />
+      {{ dog().arrivedOn | daysWaiting }}
+    </span>
+  </div>
+
+  <div class="flex flex-1 flex-col gap-4 p-5">
+    <h3 class="text-xl font-bold tracking-tight">{{ dog().name }}</h3>
+
+    <ul class="flex flex-wrap gap-2" [attr.aria-label]="'Details about ' + dog().name">
+      <li class="chip"><app-icon name="dog" [size]="14" /> {{ dog().breed }}</li>
+      <li class="chip"><app-icon name="calendar" [size]="14" /> {{ dog().ageMonths | age }}</li>
+      <li class="chip">
+        <app-icon [name]="dog().gender === 'Male' ? 'mars' : 'venus'" [size]="14" />
+        {{ dog().gender }}
+      </li>
+      <li class="chip"><app-icon name="ruler" [size]="14" /> {{ dog().size }}</li>
+      @if (dog().vaccinated) {
+        <li class="chip chip-good"><app-icon name="shield-check" [size]="14" /> Vaccinated</li>
+      }
+    </ul>
+
+    <p class="line-clamp-3 text-sm leading-relaxed text-muted">{{ dog().description }}</p>
+
+    <div class="mt-auto pt-1">
+      @if (dog().status === 'Available') {
+        <button type="button" class="btn btn-primary w-full" (click)="adopt.emit(dog())" [attr.aria-label]="'Adopt ' + dog().name">
+          Adopt Me
+          <app-icon name="heart" [size]="16" />
+        </button>
+      } @else {
+        <button type="button" class="btn btn-disabled w-full" disabled>Someone is already adopting {{ dog().name }}</button>
+      }
+    </div>
+  </div>
+</article>

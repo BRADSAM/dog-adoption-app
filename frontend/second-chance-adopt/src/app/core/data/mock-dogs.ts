@@ -1,0 +1,193 @@
+import { Dog } from '../models/dog.model';
+import { isoDaysAgo } from '../utils/id';
+
+/**
+ * Seed data used until the Spring Boot API is connected.
+ * Photos come from placedog.net; swap in real shelter photos when you have them.
+ */
+const photo = (n: number) => `https://placedog.net/640/520?id=${n}`;
+
+export function buildMockDogs(): Dog[] {
+  return [
+    {
+      id: 'd-juniper',
+      name: 'Juniper',
+      breed: 'Labrador Retriever mix',
+      ageMonths: 36,
+      gender: 'Female',
+      size: 'Large',
+      status: 'Available',
+      imageUrl: photo(1),
+      description:
+        'Juniper has been with us the longest and still greets every visitor at the gate. She walks calmly on a lead, is good with children over eight, and is happiest when she has a job, like carrying her own toy.',
+      vaccinated: true,
+      neutered: true,
+      arrivedOn: isoDaysAgo(63),
+    },
+    {
+      id: 'd-biscuit',
+      name: 'Biscuit',
+      breed: 'Beagle',
+      ageMonths: 8,
+      gender: 'Male',
+      size: 'Small',
+      status: 'Available',
+      imageUrl: photo(2),
+      description:
+        'A curious pup who follows his nose everywhere. Biscuit is learning lead manners and does best with a fenced yard and someone home for most of the day.',
+      vaccinated: true,
+      neutered: false,
+      arrivedOn: isoDaysAgo(6),
+    },
+    {
+      id: 'd-pilot',
+      name: 'Pilot',
+      breed: 'German Shepherd',
+      ageMonths: 60,
+      gender: 'Male',
+      size: 'Large',
+      status: 'Pending',
+      imageUrl: photo(3),
+      description:
+        'Steady, loyal and quietly funny. Pilot knows sit, stay and down, and prefers one close person to a crowd. A family has already asked to adopt him.',
+      vaccinated: true,
+      neutered: true,
+      arrivedOn: isoDaysAgo(28),
+    },
+    {
+      id: 'd-nala',
+      name: 'Nala',
+      breed: 'Rhodesian Ridgeback mix',
+      ageMonths: 18,
+      gender: 'Female',
+      size: 'Large',
+      status: 'Available',
+      imageUrl: photo(4),
+      description:
+        'Athletic and affectionate, Nala needs a long run every day and a sofa to collapse on afterwards. She is good with other dogs and still learning not to jump up.',
+      vaccinated: true,
+      neutered: true,
+      arrivedOn: isoDaysAgo(19),
+    },
+    {
+      id: 'd-pip',
+      name: 'Pip',
+      breed: 'Jack Russell Terrier',
+      ageMonths: 5,
+      gender: 'Male',
+      size: 'Small',
+      status: 'Available',
+      imageUrl: photo(5),
+      description:
+        'Five months of pure energy. Pip loves fetch, hates baths and will need patient training. Best suited to an active household without cats.',
+      vaccinated: true,
+      neutered: false,
+      arrivedOn: isoDaysAgo(3),
+    },
+    {
+      id: 'd-maple',
+      name: 'Maple',
+      breed: 'Shih Tzu',
+      ageMonths: 84,
+      gender: 'Female',
+      size: 'Small',
+      status: 'Available',
+      imageUrl: photo(6),
+      description:
+        'A gentle senior who loves a lap and a slow walk around the block. Maple is house-trained, quiet, and would suit a flat or a first-time owner.',
+      vaccinated: true,
+      neutered: true,
+      arrivedOn: isoDaysAgo(33),
+    },
+    {
+      id: 'd-bruno',
+      name: 'Bruno',
+      breed: 'Boerboel mix',
+      ageMonths: 30,
+      gender: 'Male',
+      size: 'Large',
+      status: 'Available',
+      imageUrl: photo(7),
+      description:
+        'Bruno looks imposing and acts like a big softie. He needs an experienced owner, a secure compound and consistent, calm training.',
+      vaccinated: true,
+      neutered: true,
+      arrivedOn: isoDaysAgo(47),
+    },
+    {
+      id: 'd-olive',
+      name: 'Olive',
+      breed: 'Border Collie mix',
+      ageMonths: 11,
+      gender: 'Female',
+      size: 'Medium',
+      status: 'Available',
+      imageUrl: photo(8),
+      description:
+        'Smart, fast and always watching you. Olive learns new tricks in minutes and needs plenty of mental exercise to stay out of trouble.',
+      vaccinated: true,
+      neutered: false,
+      arrivedOn: isoDaysAgo(12),
+    },
+    {
+      id: 'd-tango',
+      name: 'Tango',
+      breed: 'Mixed breed',
+      ageMonths: 48,
+      gender: 'Male',
+      size: 'Medium',
+      status: 'Pending',
+      imageUrl: photo(9),
+      description:
+        'Friendly with everyone he meets, people and dogs alike. Tango travels well in the car and has been house-trained since he arrived.',
+      vaccinated: true,
+      neutered: true,
+      arrivedOn: isoDaysAgo(22),
+    },
+    {
+      id: 'd-daisy',
+      name: 'Daisy',
+      breed: 'Cocker Spaniel',
+      ageMonths: 120,
+      gender: 'Female',
+      size: 'Medium',
+      status: 'Available',
+      imageUrl: photo(10),
+      description:
+        'Ten years old and still bouncy at breakfast time. Daisy is calm indoors, gets on with cats, and needs a home that can keep up with her ear cleaning.',
+      vaccinated: true,
+      neutered: true,
+      arrivedOn: isoDaysAgo(55),
+    },
+    {
+      id: 'd-scout',
+      name: 'Scout',
+      breed: 'Labrador Retriever',
+      ageMonths: 4,
+      gender: 'Male',
+      size: 'Medium',
+      status: 'Available',
+      imageUrl: photo(11),
+      description:
+        'A four-month-old Lab who chews everything and apologises with his whole body. Scout is just starting puppy classes and has had his first vaccinations.',
+      vaccinated: true,
+      neutered: false,
+      arrivedOn: isoDaysAgo(2),
+    },
+    {
+      id: 'd-zuri',
+      name: 'Zuri',
+      breed: 'Mixed breed',
+      ageMonths: 24,
+      gender: 'Female',
+      size: 'Small',
+      status: 'Available',
+      imageUrl: photo(12),
+      description:
+        'Shy for the first ten minutes, then your shadow for life. Zuri does best with gentle introductions and a quiet home.',
+      vaccinated: true,
+      neutered: true,
+      arrivedOn: isoDaysAgo(15),
+    },
+  ];
+}

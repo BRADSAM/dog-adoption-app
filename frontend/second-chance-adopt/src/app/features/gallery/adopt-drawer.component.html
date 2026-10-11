@@ -1,0 +1,205 @@
+<div class="fixed inset-0 z-50">
+  <div class="animate-fade-in absolute inset-0 bg-slate-950/60 backdrop-blur-sm" (click)="closed.emit()" aria-hidden="true"></div>
+
+  <aside
+    appModal
+    (dismiss)="closed.emit()"
+    class="glass-strong animate-slide-in absolute right-0 top-0 flex h-full w-full max-w-lg flex-col !rounded-none !border-y-0 !border-r-0 sm:!rounded-l-[2rem]"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="adopt-title"
+  >
+    <!-- Header -->
+    <header class="flex items-start gap-4 border-b p-6" style="border-color: var(--glass-border)">
+      <img
+        [src]="dog().imageUrl"
+        [alt]="''"
+        width="64"
+        height="64"
+        class="h-16 w-16 shrink-0 rounded-2xl object-cover"
+        (error)="onImageError($event)"
+      />
+      <div class="min-w-0 flex-1">
+        <h2 id="adopt-title" class="text-xl font-extrabold tracking-tight">
+          @if (state() === 'success') {
+            Request sent
+          } @else {
+            Adopt {{ dog().name }}
+          }
+        </h2>
+        <p class="mt-0.5 truncate text-sm text-muted">{{ dog().breed }}, {{ dog().ageMonths | age }} old</p>
+      </div>
+      <button type="button" class="icon-btn" (click)="closed.emit()" aria-label="Close">
+        <app-icon name="x" [size]="20" />
+      </button>
+    </header>
+
+    @if (state() === 'success') {
+      <!-- Success -->
+      <div class="flex flex-1 flex-col items-center justify-center px-8 text-center">
+        <span
+          class="animate-pop flex h-20 w-20 items-center justify-center rounded-full text-white"
+          style="background-image: var(--brand-gradient); box-shadow: 0 18px 40px -14px rgba(124, 58, 237, 0.8)"
+        >
+          <app-icon name="check" [size]="38" [stroke]="2.5" />
+        </span>
+        <h3 class="mt-7 text-2xl font-extrabold tracking-tight">Thanks, {{ sentTo().firstName }}</h3>
+        <p class="mt-3 max-w-sm leading-relaxed text-muted">
+          We've passed your interest in {{ dog().name }} to the adoption team. They'll contact you at
+          <span class="font-semibold text-ink">{{ sentTo().email }}</span> within 2 working days to arrange a visit.
+        </p>
+        <button type="button" class="btn btn-primary mt-8" (click)="closed.emit()" data-autofocus>Back to dogs</button>
+      </div>
+    } @else {
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="flex min-h-0 flex-1 flex-col">
+        <div class="flex-1 space-y-5 overflow-y-auto p-6">
+          <p class="text-sm leading-relaxed text-muted">
+            Tell us a little about you. The adoption team will use these details to contact you about {{ dog().name }} and nothing else.
+          </p>
+
+          @if (state() === 'error') {
+            <div
+              class="flex items-start gap-3 rounded-2xl border p-4 text-sm"
+              style="border-color: rgba(251, 113, 133, 0.5); background: rgba(244, 63, 94, 0.1)"
+              role="alert"
+            >
+              <app-icon name="alert-circle" [size]="18" class="mt-0.5 text-rose-400" />
+              <p>We couldn't send your request. Check your connection and select Send my interest again.</p>
+            </div>
+          }
+
+          <!-- Full name -->
+          <div>
+            <label for="fullName" class="field-label">Full name</label>
+            <div class="relative">
+              <app-icon name="user" [size]="18" class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted" />
+              <input
+                id="fullName"
+                type="text"
+                formControlName="fullName"
+                autocomplete="name"
+                placeholder="Amina Wanjiru"
+                class="field-input has-icon-l has-icon-r"
+                [class.is-invalid]="isInvalid('fullName')"
+                [class.is-valid]="isValid('fullName')"
+                [attr.aria-invalid]="isInvalid('fullName')"
+                [attr.aria-describedby]="isInvalid('fullName') ? 'fullName-error' : null"
+                data-autofocus
+              />
+              @if (isValid('fullName')) {
+                <app-icon name="check-circle" [size]="18" class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-emerald-400" />
+              }
+            </div>
+            @if (isInvalid('fullName')) {
+              <p id="fullName-error" class="field-error" role="alert">
+                <app-icon name="alert-circle" [size]="14" class="mt-px" />{{ errorText('fullName') }}
+              </p>
+            }
+          </div>
+
+          <!-- Email -->
+          <div>
+            <label for="email" class="field-label">Email</label>
+            <div class="relative">
+              <app-icon name="mail" [size]="18" class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted" />
+              <input
+                id="email"
+                type="email"
+                formControlName="email"
+                autocomplete="email"
+                inputmode="email"
+                placeholder="name@example.com"
+                class="field-input has-icon-l has-icon-r"
+                [class.is-invalid]="isInvalid('email')"
+                [class.is-valid]="isValid('email')"
+                [attr.aria-invalid]="isInvalid('email')"
+                [attr.aria-describedby]="isInvalid('email') ? 'email-error' : null"
+              />
+              @if (isValid('email')) {
+                <app-icon name="check-circle" [size]="18" class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-emerald-400" />
+              }
+            </div>
+            @if (isInvalid('email')) {
+              <p id="email-error" class="field-error" role="alert">
+                <app-icon name="alert-circle" [size]="14" class="mt-px" />{{ errorText('email') }}
+              </p>
+            }
+          </div>
+
+          <!-- Phone -->
+          <div>
+            <label for="phone" class="field-label">Phone number</label>
+            <div class="relative">
+              <app-icon name="phone" [size]="18" class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted" />
+              <input
+                id="phone"
+                type="tel"
+                formControlName="phone"
+                autocomplete="tel"
+                inputmode="tel"
+                placeholder="+254 712 345 678"
+                class="field-input has-icon-l has-icon-r"
+                [class.is-invalid]="isInvalid('phone')"
+                [class.is-valid]="isValid('phone')"
+                [attr.aria-invalid]="isInvalid('phone')"
+                [attr.aria-describedby]="isInvalid('phone') ? 'phone-error' : null"
+              />
+              @if (isValid('phone')) {
+                <app-icon name="check-circle" [size]="18" class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-emerald-400" />
+              }
+            </div>
+            @if (isInvalid('phone')) {
+              <p id="phone-error" class="field-error" role="alert">
+                <app-icon name="alert-circle" [size]="14" class="mt-px" />{{ errorText('phone') }}
+              </p>
+            }
+          </div>
+
+          <!-- Message -->
+          <div>
+            <label for="message" class="field-label">Why would you like to adopt {{ dog().name }}?</label>
+            <textarea
+              id="message"
+              formControlName="message"
+              rows="5"
+              placeholder="Tell us about your home, who lives there and any experience you have with dogs."
+              class="field-input resize-none leading-relaxed"
+              [class.is-invalid]="isInvalid('message')"
+              [class.is-valid]="isValid('message')"
+              [attr.aria-invalid]="isInvalid('message')"
+              [attr.aria-describedby]="isInvalid('message') ? 'message-error message-count' : 'message-count'"
+            ></textarea>
+            <div class="flex items-start justify-between gap-3">
+              @if (isInvalid('message')) {
+                <p id="message-error" class="field-error" role="alert">
+                  <app-icon name="alert-circle" [size]="14" class="mt-px" />{{ errorText('message') }}
+                </p>
+              } @else {
+                <span></span>
+              }
+              <p
+                id="message-count"
+                class="field-hint shrink-0 tabular-nums"
+                [class.!text-rose-400]="messageLength() > maxMessage"
+              >
+                {{ messageLength() }} / {{ maxMessage }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <footer class="flex items-center justify-end gap-3 border-t p-6" style="border-color: var(--glass-border)">
+          <button type="button" class="btn btn-ghost" (click)="closed.emit()">Cancel</button>
+          <button type="submit" class="btn btn-primary min-w-44" [disabled]="state() === 'submitting'">
+            @if (state() === 'submitting') {
+              <span class="spinner" aria-hidden="true"></span>
+              Sending
+            } @else {
+              Send my interest
+            }
+          </button>
+        </footer>
+      </form>
+    }
+  </aside>
+</div>

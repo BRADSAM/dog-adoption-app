@@ -1,0 +1,316 @@
+<div class="mx-auto max-w-shell px-4 pb-4 pt-10 sm:px-6 sm:pt-14">
+  <!-- Page header -->
+  <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl">Adoption dashboard</h1>
+      <p class="mt-2 max-w-xl text-muted">
+        Manage the dogs on the public site and follow up on adoption requests.
+      </p>
+    </div>
+    <button type="button" class="btn btn-primary self-start sm:self-auto" (click)="openAdd()">
+      <app-icon name="plus" [size]="18" [stroke]="2.25" />
+      Add dog
+    </button>
+  </div>
+
+  <!-- Stats -->
+  <dl class="mt-9 grid grid-cols-2 gap-4 lg:grid-cols-4">
+    <div class="glass flex items-center gap-4 rounded-3xl p-5">
+      <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-white" style="background-image: var(--brand-gradient)">
+        <app-icon name="dog" [size]="22" />
+      </span>
+      <div>
+        <dd class="text-2xl font-extrabold tabular-nums">{{ loading() ? '-' : stats().total }}</dd>
+        <dt class="text-sm text-muted">Dogs listed</dt>
+      </div>
+    </div>
+    <div class="glass flex items-center gap-4 rounded-3xl p-5">
+      <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-500 text-white">
+        <app-icon name="check-circle" [size]="22" />
+      </span>
+      <div>
+        <dd class="text-2xl font-extrabold tabular-nums">{{ loading() ? '-' : stats().available }}</dd>
+        <dt class="text-sm text-muted">Available</dt>
+      </div>
+    </div>
+    <div class="glass flex items-center gap-4 rounded-3xl p-5">
+      <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-slate-900" style="background-image: var(--coral-gradient)">
+        <app-icon name="clock" [size]="22" />
+      </span>
+      <div>
+        <dd class="text-2xl font-extrabold tabular-nums">{{ loading() ? '-' : stats().pending }}</dd>
+        <dt class="text-sm text-muted">Pending adoption</dt>
+      </div>
+    </div>
+    <div class="glass flex items-center gap-4 rounded-3xl p-5">
+      <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-rose-500 text-white">
+        <app-icon name="inbox" [size]="22" />
+      </span>
+      <div>
+        <dd class="text-2xl font-extrabold tabular-nums">{{ stats().newRequests }}</dd>
+        <dt class="text-sm text-muted">New requests</dt>
+      </div>
+    </div>
+  </dl>
+
+  <!-- Tabs -->
+  <div class="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div class="seg self-start" role="tablist" aria-label="Dashboard sections">
+      <button
+        type="button"
+        role="tab"
+        id="tab-dogs"
+        class="seg-item"
+        [class.seg-active]="tab() === 'dogs'"
+        [attr.aria-selected]="tab() === 'dogs'"
+        aria-controls="panel-dogs"
+        (click)="tab.set('dogs')"
+      >
+        <app-icon name="dog" [size]="16" />
+        Dogs
+      </button>
+      <button
+        type="button"
+        role="tab"
+        id="tab-requests"
+        class="seg-item"
+        [class.seg-active]="tab() === 'requests'"
+        [attr.aria-selected]="tab() === 'requests'"
+        aria-controls="panel-requests"
+        (click)="tab.set('requests')"
+      >
+        <app-icon name="inbox" [size]="16" />
+        Requests
+        @if (stats().newRequests > 0) {
+          <span class="flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1.5 text-xs font-bold tabular-nums text-white">
+            {{ stats().newRequests }}
+          </span>
+        }
+      </button>
+    </div>
+
+    @if (tab() === 'dogs') {
+      <div class="relative w-full sm:w-80">
+        <app-icon name="search" [size]="18" class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted" />
+        <label for="admin-search" class="sr-only">Search dogs by name or breed</label>
+        <input
+          id="admin-search"
+          type="search"
+          autocomplete="off"
+          placeholder="Search by name or breed"
+          class="field-input has-icon-l !rounded-full"
+          [value]="query()"
+          (input)="onSearch($event)"
+        />
+      </div>
+    }
+  </div>
+
+  <!-- Dogs table -->
+  @if (tab() === 'dogs') {
+    <section id="panel-dogs" role="tabpanel" aria-labelledby="tab-dogs" class="glass mt-5 overflow-hidden rounded-3xl">
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[760px] text-left text-sm">
+          <thead>
+            <tr>
+              <th scope="col" class="th">Dog</th>
+              <th scope="col" class="th">Breed</th>
+              <th scope="col" class="th">Age</th>
+              <th scope="col" class="th">Status</th>
+              <th scope="col" class="th text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (loading()) {
+              @for (n of [1, 2, 3, 4, 5]; track n) {
+                <tr class="tr" aria-hidden="true">
+                  <td class="td"><div class="skeleton h-11 w-48"></div></td>
+                  <td class="td"><div class="skeleton h-5 w-32"></div></td>
+                  <td class="td"><div class="skeleton h-5 w-20"></div></td>
+                  <td class="td"><div class="skeleton h-7 w-28 !rounded-full"></div></td>
+                  <td class="td"><div class="skeleton ml-auto h-9 w-20"></div></td>
+                </tr>
+              }
+            } @else {
+              @for (dog of rows(); track dog.id) {
+                <tr class="tr">
+                  <td class="td">
+                    <div class="flex items-center gap-3.5">
+                      <img
+                        [src]="dog.imageUrl"
+                        alt=""
+                        width="44"
+                        height="44"
+                        loading="lazy"
+                        class="h-11 w-11 shrink-0 rounded-xl object-cover"
+                        (error)="onImageError($event)"
+                      />
+                      <div class="min-w-0">
+                        <p class="truncate font-semibold">{{ dog.name }}</p>
+                        <p class="text-xs text-muted">{{ dog.gender }}, {{ dog.size }}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="td text-muted">{{ dog.breed }}</td>
+                  <td class="td text-muted">{{ dog.ageMonths | age }}</td>
+                  <td class="td">
+                    <label [for]="'status-' + dog.id" class="sr-only">Status for {{ dog.name }}</label>
+                    <select
+                      [id]="'status-' + dog.id"
+                      class="status-select"
+                      [class.s-available]="dog.status === 'Available'"
+                      [class.s-pending]="dog.status === 'Pending'"
+                      [class.s-adopted]="dog.status === 'Adopted'"
+                      [value]="dog.status"
+                      (change)="changeDogStatus(dog, $event)"
+                    >
+                      @for (s of dogStatuses; track s) {
+                        <option [value]="s" [selected]="s === dog.status">{{ s }}</option>
+                      }
+                    </select>
+                  </td>
+                  <td class="td">
+                    <div class="flex items-center justify-end gap-1">
+                      <button type="button" class="icon-btn" (click)="openEdit(dog)" [attr.aria-label]="'Edit ' + dog.name">
+                        <app-icon name="pencil" [size]="18" />
+                      </button>
+                      <button type="button" class="icon-btn icon-btn-danger" (click)="askDelete(dog)" [attr.aria-label]="'Delete ' + dog.name">
+                        <app-icon name="trash" [size]="18" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="5" class="px-6 py-16">
+                    <div class="mx-auto flex max-w-sm flex-col items-center text-center">
+                      <span class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl text-white" style="background-image: var(--brand-gradient)">
+                        <app-icon name="dog" [size]="24" />
+                      </span>
+                      @if (query().trim()) {
+                        <h2 class="text-lg font-bold">No dogs match "{{ query().trim() }}"</h2>
+                        <p class="mt-1.5 text-sm text-muted">Check the spelling or search for a different breed.</p>
+                        <button type="button" class="btn btn-ghost mt-5" (click)="query.set('')">Clear search</button>
+                      } @else {
+                        <h2 class="text-lg font-bold">No dogs listed yet</h2>
+                        <p class="mt-1.5 text-sm text-muted">Add the first dog to show it on the public site.</p>
+                        <button type="button" class="btn btn-primary mt-5" (click)="openAdd()">Add dog</button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+
+  <!-- Requests table -->
+  @if (tab() === 'requests') {
+    <section id="panel-requests" role="tabpanel" aria-labelledby="tab-requests" class="glass mt-5 overflow-hidden rounded-3xl">
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[860px] text-left text-sm">
+          <thead>
+            <tr>
+              <th scope="col" class="th">Adopter</th>
+              <th scope="col" class="th">Dog</th>
+              <th scope="col" class="th">Message</th>
+              <th scope="col" class="th">Received</th>
+              <th scope="col" class="th">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of inquiries(); track item.id) {
+              <tr class="tr">
+                <td class="td">
+                  <p class="font-semibold">{{ item.fullName }}</p>
+                  <a [href]="'mailto:' + item.email" class="mt-0.5 flex items-center gap-1.5 text-xs text-muted hover:text-ink">
+                    <app-icon name="mail" [size]="13" />{{ item.email }}
+                  </a>
+                  <a [href]="'tel:' + item.phone" class="mt-0.5 flex items-center gap-1.5 text-xs text-muted hover:text-ink">
+                    <app-icon name="phone" [size]="13" />{{ item.phone }}
+                  </a>
+                </td>
+                <td class="td font-medium">{{ item.dogName }}</td>
+                <td class="td max-w-xs">
+                  <p class="line-clamp-2 text-muted" [attr.title]="item.message">{{ item.message }}</p>
+                </td>
+                <td class="td whitespace-nowrap text-muted">{{ item.createdAt | date: 'd MMM, HH:mm' }}</td>
+                <td class="td">
+                  <label [for]="'inq-' + item.id" class="sr-only">Status of {{ item.fullName }}'s request</label>
+                  <select
+                    [id]="'inq-' + item.id"
+                    class="status-select"
+                    [class.s-new]="item.status === 'New'"
+                    [class.s-contacted]="item.status === 'Contacted'"
+                    [class.s-closed]="item.status === 'Closed'"
+                    [value]="item.status"
+                    (change)="changeInquiryStatus(item, $event)"
+                  >
+                    @for (s of inquiryStatuses; track s) {
+                      <option [value]="s" [selected]="s === item.status">{{ s }}</option>
+                    }
+                  </select>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="px-6 py-16">
+                  <div class="mx-auto flex max-w-sm flex-col items-center text-center">
+                    <span class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl text-white" style="background-image: var(--brand-gradient)">
+                      <app-icon name="inbox" [size]="24" />
+                    </span>
+                    <h2 class="text-lg font-bold">No adoption requests yet</h2>
+                    <p class="mt-1.5 text-sm text-muted">New requests from the public site will show up here.</p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</div>
+
+<!-- Add / edit modal -->
+@if (formOpen()) {
+  <app-dog-form-modal [dog]="editing()" (closed)="closeForm()" />
+}
+
+<!-- Delete confirmation -->
+@if (deleting(); as dog) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="animate-fade-in absolute inset-0 bg-slate-950/60 backdrop-blur-sm" (click)="deleting.set(null)" aria-hidden="true"></div>
+    <div
+      appModal
+      (dismiss)="deleting.set(null)"
+      class="glass-strong animate-pop relative w-full max-w-md rounded-[2rem] p-7"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="delete-title"
+      aria-describedby="delete-desc"
+    >
+      <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-500/15 text-rose-400">
+        <app-icon name="trash" [size]="24" />
+      </span>
+      <h2 id="delete-title" class="mt-5 text-xl font-extrabold tracking-tight">Delete {{ dog.name }}?</h2>
+      <p id="delete-desc" class="mt-2 text-sm leading-relaxed text-muted">
+        {{ dog.name }} will be removed from the public site and this list. This can't be undone.
+      </p>
+      <div class="mt-7 flex justify-end gap-3">
+        <button type="button" class="btn btn-ghost" (click)="deleting.set(null)" data-autofocus>Keep {{ dog.name }}</button>
+        <button type="button" class="btn btn-danger min-w-32" [disabled]="deleteBusy()" (click)="confirmDelete()">
+          @if (deleteBusy()) {
+            <span class="spinner" aria-hidden="true"></span>
+            Deleting
+          } @else {
+            Delete dog
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

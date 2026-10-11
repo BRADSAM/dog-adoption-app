@@ -1,0 +1,54 @@
+<header class="sticky top-0 z-40">
+  <div class="glass-strong border-x-0 border-t-0 !shadow-none">
+    <nav class="mx-auto flex h-16 max-w-shell items-center justify-between gap-3 px-4 sm:px-6" aria-label="Main">
+      <a routerLink="/" class="flex items-center gap-3 rounded-xl" aria-label="Second Chance, home">
+        <span
+          class="flex h-10 w-10 items-center justify-center rounded-2xl text-white shadow-lg"
+          style="background-image: var(--brand-gradient); box-shadow: 0 10px 22px -10px rgba(124, 58, 237, 0.8)"
+        >
+          <app-icon name="paw" [size]="22" [stroke]="2" />
+        </span>
+        <span class="hidden leading-tight min-[420px]:block">
+          <span class="block text-base font-extrabold tracking-tight">Second Chance</span>
+          <span class="hidden text-xs text-muted sm:block">City Veterinary Office</span>
+        </span>
+      </a>
+
+      <div class="flex items-center gap-2 sm:gap-3">
+        <div class="seg" role="group" aria-label="Choose a view">
+          <a
+            routerLink="/"
+            routerLinkActive="seg-active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="seg-item !px-3 sm:!px-4"
+            ariaCurrentWhenActive="page"
+          >
+            <app-icon name="dog" [size]="16" class="hidden sm:inline-flex" />
+            <span>Adopters</span>
+          </a>
+          <a routerLink="/admin" routerLinkActive="seg-active" class="seg-item !px-3 sm:!px-4" ariaCurrentWhenActive="page">
+            <app-icon name="dashboard" [size]="16" class="hidden sm:inline-flex" />
+            <span>Staff</span>
+            @if (newRequests() > 0) {
+              <span
+                class="flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1.5 text-xs font-bold tabular-nums text-white"
+                [attr.aria-label]="newRequests() + ' new adoption requests'"
+              >
+                {{ newRequests() }}
+              </span>
+            }
+          </a>
+        </div>
+
+        <button
+          type="button"
+          class="icon-btn glass !h-10 !w-10 !rounded-full"
+          (click)="themeService.toggle()"
+          [attr.aria-label]="themeService.theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+        >
+          <app-icon [name]="themeService.theme() === 'dark' ? 'sun' : 'moon'" [size]="18" />
+        </button>
+      </div>
+    </nav>
+  </div>
+</header>
